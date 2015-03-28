@@ -124,18 +124,6 @@ class MyFirstNN:
         ''' update hidden to out weights '''
         self.w_hidden_to_out = self.w_hidden_to_out + self.delta_w_hidden_to_out
 
-    #call this method to determine the input layers as well as the output layers and distinct targets
-    def binarizelabels(self):
-        
-        dist_targets = self.labels       
-        trgts_dict = {}
-        trgts_dict_pos = {}
-        for i,target in enumerate(sorted(dist_targets)):
-            trgts_dict[target] = i
-            trgts_dict_pos[i] = target
-        self.trgts_dict = trgts_dict
-        self.trgts_dict_pos = trgts_dict_pos
-        self.n_outer_layer = len(dist_targets)
        
    
     def fit(self,X,Y,test_data=None,test_class=None):          
@@ -158,7 +146,7 @@ class MyFirstNN:
         X= ma.hstack((X,bias))
         tst_error = []
         for epoch in range(self.epochs):  
-            print epoch
+            #print epoch
             
             wghts_after_each_epoch.append((self.w_hidden_to_out,self.w_in_to_hidden))
           
@@ -176,16 +164,16 @@ class MyFirstNN:
                 
             train_error = error/(X.shape[0])
   
-            print 'train_error',train_error
+            #print 'train_error',train_error
             self.training_error.append(train_error)
-            print (epoch, str(datetime.datetime.now()) ,'end')
-            if test_data != None:
+            #print (epoch, str(datetime.datetime.now()) ,'end')
+            if test_data.shape > 0:
                  predicted = self.predict(test_data)
                 
                  test_cls= numpy.array(test_class).reshape(test_data.shape[0],self.n_outer_layer)
                  
                  test_error = ma.sum(ma.power(test_cls-predicted,2),axis=0)/(test_data.shape[0])
-                 print 'test_error',test_error
+                 #print 'test_error',test_error
                  tst_error.append(test_error)
           
                        

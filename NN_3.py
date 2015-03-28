@@ -9,10 +9,11 @@ using numpy matrix multiplication to make things bit easy.
 """
 import numpy as ma
 import numpy
+from numpy.linalg import inv
 #from numpy import ma 
 import math
 import datetime
-from numpy.linalg import inv
+
 
 def sigmoid(vl):
     return (1/(1+ma.exp(-vl)))
@@ -27,10 +28,8 @@ def linear_diff(x):
     return 1
     
 class MyFirstNN:
-    def __init__(self,n_hidden_layer,fnc='sigmoid',learning_eta= 1.0,epochs= 1000,outer_fnc= None,Normalize= True,batch_size = 1,wgt_decay = 0,bs=0,out_bs=0):
+    def __init__(self,n_hidden_layer,fnc='sigmoid',learning_eta= 1.0,epochs= 1000,outer_fnc= None,Normalize= True,batch_size = 1,wgt_decay = 0):
         self.n_hidden_layer = n_hidden_layer
-        self.bs = bs
-        self.out_bs = out_bs
         print n_hidden_layer
         self.trgts_dict= {}
         self.trgts_dict_pos= {}   
@@ -68,8 +67,6 @@ class MyFirstNN:
         self.epochs = epochs
         self.training_error= []
         self.batch_size = batch_size
-        self.jcbn = []
-        self.overallerror = []
 
         
     def init_weights(self):
@@ -91,11 +88,11 @@ class MyFirstNN:
         #print (hidden_layer_out.shape)
    
         inputsize = hidden_layer_out.shape[1]
-        bias = ma.multiply(ma.ones(inputsize).reshape(1,inputsize),self.out_bs)
+        bias = ma.ones(inputsize).reshape(1,inputsize)
         hidden_layer_out= ma.array(ma.vstack((hidden_layer_out,bias)))
 
         hidden_layer_diff = self.fnc_diff_hidden_layers(x)
-        hidden_layer_diff= ma.vstack((hidden_layer_diff,bias))
+
         ''' visit all output nodes and calculate the outputs which will then be compared with target to get error at that output node '''
         x = self.w_hidden_to_out.dot(hidden_layer_out)
    
@@ -109,47 +106,49 @@ class MyFirstNN:
         
     def backpropagate(self,hidden_layer_out,hidden_layer_diff,out_layer_output,out_layer_diff,out,inpts):
         
-        ''' betas for output layer neuron to calculate the weights '''   
-
-        out_layer_betas = ma.multiply(out_layer_diff,(ma.subtract(out.T,out_layer_output).T).T)  
-        out_layer_betas = out_layer_diff
-        hidden_to_out_jacobian = ma.multiply(out_layer_betas,hidden_layer_out)
-
-        ab = hidden_to_out_jacobian.flatten()
-
-        ''' calculate hidden layer betas and  update input to hidden layer weights based on these betas '''
-
-        hidden_layer_betas = ma.multiply(hidden_layer_diff,hidden_to_out_jacobian.dot(out_layer_betas.T))    
-
-        in_to_hiden_jacobian = ma.multiply(hidden_layer_betas,inpts)
-
-        cd =in_to_hiden_jacobian.flatten()
-
-        abcd = ma.hstack((cd,ab))
-
-        self.jcbn.append(abcd)
-       
-    def update_weights(self,out):
-
-        jt = numpy.array(self.jcbn)      
-        out_layer_output= numpy.array(self.overallerror).flatten()   
-        err = ma.subtract(out,out_layer_output).T        
+        ''' betas for output layer neuron to calculate the weights ''' 
+        print hidden_layer_diff.shape,out_layer_diff.shape
+        print hidden_layer_diff
+        print self.w_hidden_to_out
+        print self.w_in_to_hidden
+        print g
+        print hidden_layer_diff
+        print self.w_hidden_to_out
+        print self.w_in_to_hidden
+        print out_layer_output.shape
+        jt = ma.array(ma.vstack((ma.array(hidden_layer_diff),ma.array(out_layer_diff)))).T
+        
+        err = ma.subtract(out.T,out_layer_output).T
+        print 'err shape'
+        print jt.shape
+        print err.shape
         g = ma.dot(jt.T,err)
+        print 'g shape'
+        print g.shape
+        print jt.shape
         h = ma.dot(jt.T,jt) 
-        lambda_i = ma.multiply(self.learning_eta,ma.identity(h.shape[0]))
+        lambda_i = ma.multiply(0.5,ma.identity(10))
+        print h.shape
+        print lambda_i.shape
         h_lam = ma.add(h,lambda_i)
-        hinv = inv(h_lam)   
-        hg = ma.dot(hinv,g)
-        ''' update in to hidden weights '''
-        numofhiddenweights = self.w_in_to_hidden.shape[0]*self.w_in_to_hidden.shape[1]
-        numfoutwghts = self.w_hidden_to_out.shape[0]*self.w_hidden_to_out.shape[1]
-        self.w_delta_in_to_hidden = hg[0:numofhiddenweights].copy().reshape(self.w_in_to_hidden.shape[0],self.w_in_to_hidden.shape[1])
-        self.w_in_to_hidden = ma.add(self.w_in_to_hidden ,  self.w_delta_in_to_hidden)        
-        ''' update hidden to out weights '''
-        self.w_delta_hidden_to_out = hg[-numfoutwghts:].reshape(self.w_hidden_to_out.shape[0],self.w_hidden_to_out.shape[1])
-        self.w_hidden_to_out = ma.add(self.w_hidden_to_out , self.w_delta_hidden_to_out)
-
+        hinv = inv(h_lam)
+        print 'h inv shape'
+        print hinv.shape
        
+       
+        hg = ma.dot(hinv,g)
+        print 'hg shape'
+        print hg.shape
+        
+       
+    def update_weights(self):
+        ''' update in to hidden weights '''
+ 
+        self.w_in_to_hidden = self.w_in_to_hidden   + self.delta_w_in_to_hidden[:-1,:]
+
+        ''' update hidden to out weights '''
+        self.w_hidden_to_out = self.w_hidden_to_out + self.delta_w_hidden_to_out
+
    
     def fit(self,X,Y,test_data=None,test_class=None):          
         trgts = Y  
@@ -167,17 +166,12 @@ class MyFirstNN:
         bs = self.batch_size
         wghts_after_each_epoch = [] 
         inputsize = X.shape[0]
-        bias = ma.multiply(ma.ones(inputsize).reshape(inputsize,1),self.bs)
+        bias = ma.ones(inputsize).reshape(inputsize,1)
         X= ma.hstack((X,bias))
         tst_error = []
-        prverr = 100000.00
-        prv_w_in_to_hidden= self.w_in_to_hidden.copy()
-        prv_w_hidden_to_out= self.w_hidden_to_out.copy()
-        #prv_learning_rate = self.learning_eta
         for epoch in range(self.epochs):  
-            #print epoch
-            self.jcbn= []
-            self.overallerror = []
+            print epoch
+            
             wghts_after_each_epoch.append((self.w_hidden_to_out,self.w_in_to_hidden))
           
             error= ma.zeros(self.n_outer_layer,dtype='float64')  
@@ -188,39 +182,22 @@ class MyFirstNN:
                 targets = trgts[i*bs:(i+1)*bs]     
                 out = targets 
                 hidden_layer_out,hidden_layer_diff,out_layer_output,out_layer_diff = self.forward_pass(inputs)   
-                self.overallerror.append((out_layer_output-out).flatten())
-       
                 self.backpropagate(hidden_layer_out,hidden_layer_diff,out_layer_output,out_layer_diff,out,inputs)      
-                error = error + ma.sum(ma.subtract(targets,out_layer_output.T)**2,axis=0) 
+                self.update_weights()                             
+                error = error + ma.sum(ma.subtract(targets,out_layer_output.T)**2,axis=0)  
+                
             train_error = error/(X.shape[0])
-
-            if (train_error > prverr):
-                print 'here'
-                print self.learning_eta 
-                self.w_in_to_hidden = prv_w_in_to_hidden
-                self.w_hidden_to_out = prv_w_hidden_to_out
-                self.learning_eta = self.learning_eta*3.0
-            else:
-                print 'there'
-                print self.learning_eta 
-                self.learning_eta = self.learning_eta/3.0
-                prv_w_in_to_hidden = self.w_in_to_hidden
-                prv_w_hidden_to_out = self.w_hidden_to_out
-                prverr = train_error
-                self.update_weights(trgts)                             
-            
-            
   
-            #print 'train_error',train_error
+            print 'train_error',train_error
             self.training_error.append(train_error)
-            #print (epoch, str(datetime.datetime.now()) ,'end')
+            print (epoch, str(datetime.datetime.now()) ,'end')
             if test_data.shape > 0:
                  predicted = self.predict(test_data)
                 
                  test_cls= numpy.array(test_class).reshape(test_data.shape[0],self.n_outer_layer)
                  
                  test_error = ma.sum(ma.power(test_cls-predicted,2),axis=0)/(test_data.shape[0])
-                 #print 'test_error',test_error
+                 print 'test_error',test_error
                  tst_error.append(test_error)
           
                        
@@ -235,7 +212,7 @@ class MyFirstNN:
             X = self.nrmlz(X)
    
        inputsize = X.shape[0]
-       bias = ma.multiply(ma.ones(inputsize).reshape(inputsize,1),self.bs)
+       bias = ma.ones(inputsize).reshape(inputsize,1)
        X   = ma.hstack((X,bias))
 
       
