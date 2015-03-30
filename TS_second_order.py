@@ -5,7 +5,7 @@ Created on Thu Jan 29 16:18:39 2015
 @author: dsing001
 """
 
-from NN_2 import MyFirstNN
+from NN_2_1 import MyFirstNN
 import numpy
 import math
 import datetime
@@ -17,7 +17,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 def train_neural_net(train_data,train_cls,test_data,test_cls,n_hidden_layer= 5,learning_rate=1,epochs = 100,fnc='sigmoid',wgt_decay=0.0,pp=None): 
     
 
-    n = MyFirstNN(n_hidden_layer,fnc=fnc,learning_eta=learning_rate,epochs=epochs,Normalize=True,batch_size = 1,outer_fnc='linear',wgt_decay=wgt_decay,bs = 0.0,out_bs=0.0) 
+    n = MyFirstNN(n_hidden_layer,fnc=fnc,learning_eta=learning_rate,epochs=epochs,Normalize=False,batch_size = 1,outer_fnc='linear',wgt_decay=wgt_decay,bs = 1.0,out_bs=1.0) 
 
     train_err,test_err,wghts_after_each_epoch = n.fit(train_data,train_cls,test_data,test_cls)
 
@@ -59,7 +59,8 @@ def train_neural_net(train_data,train_cls,test_data,test_cls,n_hidden_layer= 5,l
     #print wghts_after_each_epoch
     print 'test_data fit starts'
     predicted = n.predict(test_data)
-    #print predicted,test_cls
+    print predicted
+    print test_cls
     td = predicted[:,0]
     td = pd.Series(td)
     #print td
@@ -97,7 +98,7 @@ rdm = numpy.random.normal(0,0.05,ln)
 
 ts_t = []
 k = 10
-numoftrn = 400
+numoftrn = 450
 for i in range(len(ts)):
     if i <= k:
         continue
@@ -131,6 +132,8 @@ for nl in range(2,11,1):
         for smts in smt:      
             train_neural_net(train_data,train_class,test_data,test_class,n_hidden_layer=n_hidden_layer,learning_rate=learning_rate,epochs =100,wgt_decay=smts/10000.0,pp=pp)
 '''
-train_neural_net(train_data,train_class,test_data,test_class,n_hidden_layer=5,learning_rate=0.8,epochs =100,wgt_decay=0.0,pp=pp)
+for nl in range(2,11,1):
+    n_hidden_layer= nl
+    train_neural_net(train_data,train_class,test_data,test_class,n_hidden_layer=n_hidden_layer,learning_rate=1.0,epochs =50,wgt_decay=0.0,pp=pp)
 pp.close()      
 print (datetime.datetime.now())

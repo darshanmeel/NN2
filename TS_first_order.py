@@ -96,7 +96,7 @@ rdm = numpy.random.normal(0,0.05,ln)
 
 ts_t = []
 k = 10
-numoftrn = 300
+numoftrn = 450
 for i in range(len(ts)):
     if i <= k:
         continue
@@ -118,12 +118,12 @@ smthing=True
 
 print (datetime.datetime.now())
 pp = PdfPages('Output_figures.pdf')
-for nl in range(2,11,1):
+for nl in range(3,11,1):
     n_hidden_layer= nl
-    for eta in range(50,101,5):
+    for eta in range(50,81,5):
         learning_rate= eta/100.0
         if (smthing):
-            smt = range(0,11,1)
+            smt = range(0,5,1)
         else:
             smt = range(1)
         for smts in smt:      

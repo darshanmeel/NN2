@@ -67,7 +67,7 @@ class MyFirstNN:
         self.learning_eta = learning_eta            
         self.epochs = epochs
         self.training_error= []
-        self.batch_size = batch_size
+        self.batch_size = 1
 
         
     def init_weights(self):
