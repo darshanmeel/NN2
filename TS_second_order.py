@@ -17,7 +17,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 def train_neural_net(train_data,train_cls,test_data,test_cls,n_hidden_layer= 5,learning_rate=1,epochs = 100,fnc='sigmoid',wgt_decay=0.0,pp=None): 
     
 
-    n = MyFirstNN(n_hidden_layer,fnc=fnc,learning_eta=learning_rate,epochs=epochs,Normalize=False,batch_size = 1,outer_fnc='linear',wgt_decay=wgt_decay,bs = 1.0,out_bs=1.0) 
+    n = MyFirstNN(n_hidden_layer,fnc=fnc,learning_eta=learning_rate,epochs=epochs,Normalize=False,batch_size = 1,outer_fnc='linear',wgt_decay=wgt_decay,bs = 0.0,out_bs=0.0) 
 
     train_err,test_err,wghts_after_each_epoch = n.fit(train_data,train_cls,test_data,test_cls)
 
