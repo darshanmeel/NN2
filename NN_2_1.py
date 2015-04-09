@@ -214,12 +214,12 @@ class MyFirstNN:
             
                  
             if (train_error > new_error):
-                print 'here'
-                print self.learning_eta             
+                #print 'here'
+                #print self.learning_eta             
                 self.learning_eta = self.learning_eta/10.0
             else:
-                print 'there'
-                print self.learning_eta 
+                #print 'there'
+                #print self.learning_eta 
                 self.learning_eta = self.learning_eta*10.0
                 self.w_in_to_hidden = prv_w_in_to_hidden
                 self.w_hidden_to_out = prv_w_hidden_to_out 

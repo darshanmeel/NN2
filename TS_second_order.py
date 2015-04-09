@@ -21,9 +21,12 @@ def train_neural_net(train_data,train_cls,test_data,test_cls,n_hidden_layer= 5,l
 
     train_err,test_err,wghts_after_each_epoch = n.fit(train_data,train_cls,test_data,test_cls)
 
+    print 'train error'
+    print n_hidden_layer,learning_rate,wgt_decay
     train_error= pd.Series(numpy.array(train_err).flat)
+    print train_error[epochs -1]
     test_error = pd.Series(numpy.array(test_err).flat)
-
+    print test_error[epochs -1]
     #show the train and test erros
     print 'show the train and test errors starts'
     plt.show()
@@ -132,7 +135,9 @@ for nl in range(2,11,1):
         for smts in smt:      
             train_neural_net(train_data,train_class,test_data,test_class,n_hidden_layer=n_hidden_layer,learning_rate=learning_rate,epochs =100,wgt_decay=smts/10000.0,pp=pp)
 '''
-for nl in range(2,11,1):
+# I havekept the number of epochs to be 100 and I have not used any early stopping.
+# you can change the number of hidden layers for example range(6,9,2) means that try with 6 hidden layers and then increase it by 2 untill you cross 9 this means it will run for hidden layers 6 and 8
+for nl in range(6,9,2):
     n_hidden_layer= nl
     train_neural_net(train_data,train_class,test_data,test_class,n_hidden_layer=n_hidden_layer,learning_rate=1.0,epochs =50,wgt_decay=0.0,pp=pp)
 pp.close()      

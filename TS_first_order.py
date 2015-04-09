@@ -21,8 +21,12 @@ def train_neural_net(train_data,train_cls,test_data,test_cls,n_hidden_layer= 5,l
 
     train_err,test_err,wghts_after_each_epoch = n.fit(train_data,train_cls,test_data,test_cls)
 
+    print 'train error'
+    print n_hidden_layer,learning_rate,wgt_decay
     train_error= pd.Series(numpy.array(train_err).flat)
+    print train_error[epochs -1]
     test_error = pd.Series(numpy.array(test_err).flat)
+    print test_error[epochs -1]
     #show the train and test erros
     print 'show the train and test errors starts'
     plt.show()
@@ -115,17 +119,21 @@ test_data = ts_t[numoftrn:,:k]
 test_class = numpy.array(ts_t[numoftrn:,k])
 
 smthing=True
-
+# I havekept the number of epochs to be 100 and I have not used any early stopping.
 print (datetime.datetime.now())
 pp = PdfPages('Output_figures.pdf')
-for nl in range(3,11,1):
+# you can change the number of hidden layers for example range(6,9,2) means that try with 6 hidden layers and then increase it by 2 untill you cross 9 this means it will run for hidden layers 6 and 8
+for nl in range(6,9,2):
     n_hidden_layer= nl
-    for eta in range(50,81,5):
+    # eta ia learning rate and if you see that it is range between 0 and 100 and this is because range function takes integers only. I have divided this by 100 to make it proper learning rates as learning
+    # rate should be between 0 and 1.
+    for eta in range(75,76,15):
         learning_rate= eta/100.0
         if (smthing):
-            smt = range(0,5,1)
+            smt = range(0,5,3)
         else:
             smt = range(1)
+        # smoothing rate 0 means no regularization otherwise it means that apply regularization. Here as well values are between 0 and 5 but these are divided by 10000.
         for smts in smt:      
             train_neural_net(train_data,train_class,test_data,test_class,n_hidden_layer=n_hidden_layer,learning_rate=learning_rate,epochs =100,wgt_decay=smts/10000.0,pp=pp)
 pp.close()      
